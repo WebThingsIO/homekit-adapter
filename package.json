@@ -2,7 +2,7 @@
   "name": "homekit-adapter",
   "version": "0.1.0",
   "description": "HomeKit device adapter for Mozilla IoT Gateway.",
-  "main": "index.js",
+  "main": "main.py",
   "keywords": [
     "mozilla",
     "iot",
@@ -18,17 +18,16 @@
   "bugs": {
     "url": "https://github.com/mrstegeman/homekit-adapter/issues"
   },
-  "dependencies": {
-    "bonjour": "^3.5.0",
-    "hap-client": "^1.0.1",
-    "rxjs": "^5.5.6"
-  },
   "files": [
     "LICENSE",
     "SHA256SUMS",
-    "index.js",
-    "node_modules",
-    "homekit-adapter.js"
+    "lib",
+    "main.py",
+    "pkg/__init__.py",
+    "pkg/homekit_adapter.py",
+    "pkg/homekit_device.py",
+    "pkg/homekit_property.py",
+    "pkg/util.py"
   ],
   "moziot": {
     "api": {
@@ -36,14 +35,11 @@
       "max": 1
     },
     "plugin": true,
-    "exec": "{nodeLoader} {path}",
+    "exec": "python3 {path}/main.py"
     "config": {
       "pinCodes": {
+        "3A:B3:72:00:57:C5": "447-78-625"
       }
     }
-  },
-  "devDependencies": {
-    "babel-eslint": "^8.2.1",
-    "eslint": "^4.17.0"
   }
 }
