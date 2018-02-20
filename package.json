@@ -35,10 +35,9 @@
       "max": 1
     },
     "plugin": true,
-    "exec": "python3 {path}/main.py"
+    "exec": "python3 {path}/main.py",
     "config": {
       "pinCodes": {
-        "3A:B3:72:00:57:C5": "447-78-625"
       }
     }
   }

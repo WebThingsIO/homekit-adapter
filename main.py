@@ -26,6 +26,7 @@ def cleanup(signum, frame):
     if _ADAPTER is not None:
         _ADAPTER.close_proxy()
 
+    _ADAPTER.unpair_all()
     sys.exit(0)
 
 
@@ -37,6 +38,7 @@ if __name__ == '__main__':
 
     signal.signal(signal.SIGINT, cleanup)
     signal.signal(signal.SIGTERM, cleanup)
+
     _ADAPTER = HomeKitAdapter(verbose=True)
 
     # Wait until the proxy stops running, indicating that the gateway shut us
