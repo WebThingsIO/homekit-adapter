@@ -28,8 +28,17 @@ class HomeKitDevice(Device):
         Device.__init__(self, adapter, _id)
 
         self.dev = dev
-        self.description = dev['md']
-        self.name = dev['name'].split('.')[0]
+
+        if 'md' in dev and dev['md']:
+            self.description = dev['md']
+        else:
+            self.description = _id
+
+        if 'name' in dev and dev['name']:
+            self.name = dev['name'].split('.')[0]
+        else:
+            self.name = _id
+
         self.bridge = bridge
 
         if bridge is not None:
