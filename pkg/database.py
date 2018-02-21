@@ -20,6 +20,9 @@ if 'MOZIOT_HOME' in os.environ:
     _DB_PATHS.append(
         os.path.join(os.environ['MOZIOT_HOME'], 'config', 'db.sqlite3'))
 
+if 'MOZIOT_DATABASE' in os.environ:
+    _DB_PATHS.append(os.environ['MOZIOT_DATABASE'])
+
 
 class Database:
     """Wrapper around gateway's settings database."""
