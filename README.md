@@ -13,6 +13,7 @@ HomeKit device adapter for Mozilla IoT Gateway
     * [Koogeek P1](https://www.koogeek.com/p-p1.html)
 * Bridges
     * [Homebridge](https://github.com/nfarina/homebridge)
+    * [Philips Hue Bridge v2](https://www2.meethue.com/en-us/p/hue-bridge/046677458478)
 
 ## Untested but _Should Work_
 
