@@ -4,16 +4,21 @@ HomeKit device adapter for Mozilla IoT Gateway
 
 # Supported Devices
 
+**NOTE**: Devices typically need to be unpaired from Android/iOS before using them with the gateway.
+
 ## Tested and Working
 
 * Smart plugs (represented as `onOffSwitch`)
     * [iDevices Switch](https://store.idevicesinc.com/idevices-switch/)
     * [Koogeek P1](https://www.koogeek.com/p-p1.html)
+* Bridges
+    * [Homebridge](https://github.com/nfarina/homebridge)
 
 ## Untested but _Should Work_
 
 * All other WiFi smart plugs
 * All WiFi light bulbs
+* All other bridge devices
 
 # Requirements
 

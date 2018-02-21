@@ -30,7 +30,12 @@ class HomeKitProperty(Property):
 
         value -- the value to set
         """
-        ret = self.device.client.set_characteristics({
+        if self.device.bridge is not None:
+            client = self.device.bridge.client
+        else:
+            client = self.device.client
+
+        ret = client.set_characteristics({
             '{}.{}'.format(self.aid, self.iid): value,
         })
 
@@ -90,8 +95,13 @@ class HomeKitBulbProperty(HomeKitProperty):
         sp = self.device.properties['_saturation']
         vp = self.device.properties['level']
 
+        if self.device.bridge is not None:
+            client = self.device.bridge.client
+        else:
+            client = self.device.client
+
         # Set all 3 values at once
-        ret = self.device.client.set_characteristics({
+        ret = client.set_characteristics({
             '{}.{}'.format(hp.aid, hp.iid): h,
             '{}.{}'.format(sp.aid, sp.iid): s,
             '{}.{}'.format(vp.aid, vp.iid): v,

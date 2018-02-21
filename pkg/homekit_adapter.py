@@ -4,7 +4,7 @@ from gateway_addon import Adapter
 from hapclient import HapClient
 
 from .database import Database
-from .homekit_device import HomeKitBulb, HomeKitPlug
+from .homekit_device import HomeKitBridge, HomeKitBulb, HomeKitPlug
 
 
 _TIMEOUT = 3
@@ -47,6 +47,13 @@ class HomeKitAdapter(Adapter):
                         device = HomeKitPlug(self, _id, dev)
                     elif dev['ci'] == 'Lightbulb':
                         device = HomeKitBulb(self, _id, dev)
+                    elif dev['ci'] == 'Bridge':
+                        device = HomeKitBridge(self, _id, dev)
+
+                        # Don't call handle_device_added(), as we don't want
+                        # the bridge itself reported to the gateway.
+                        self.devices[device.id] = device
+                        continue
                     else:
                         continue
                 except ValueError as e:

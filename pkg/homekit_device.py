@@ -16,15 +16,24 @@ _POLL_INTERVAL = 5
 class HomeKitDevice(Device):
     """HomeKit device type."""
 
-    def __init__(self, adapter, _id, dev):
+    def __init__(self, adapter, _id, dev, bridge=None):
         """
         Initialize the object.
 
         adapter -- the Adapter managing this device
         _id -- ID of this device
         dev -- the device description object to initialize from
+        bridge -- HomeKitBridge object, if attached to one
         """
         Device.__init__(self, adapter, _id)
+
+        self.dev = dev
+        self.description = dev['md']
+        self.name = dev['name'].split('.')[0]
+        self.bridge = bridge
+
+        if bridge is not None:
+            return
 
         database = Database()
         if not database.open():
@@ -55,10 +64,6 @@ class HomeKitDevice(Device):
 
         database.close()
 
-        self.dev = dev
-        self.description = dev['md']
-        self.name = dev['name'].split('.')[0]
-
         t = threading.Thread(target=self.poll)
         t.daemon = True
         t.start()
@@ -83,21 +88,27 @@ class HomeKitDevice(Device):
 class HomeKitPlug(HomeKitDevice):
     """HomeKit smart plug type."""
 
-    def __init__(self, adapter, _id, dev):
+    def __init__(self, adapter, _id, dev, bridge=None, accessories=None):
         """
         Initialize the object.
 
         adapter -- the Adapter managing this device
         _id -- ID of this device
         dev -- the device description object to initialize from
+        bridge -- HomeKitBridge object, if attached to one
+        accessories -- optional list of accessories to initialize from
         """
-        HomeKitDevice.__init__(self, adapter, _id, dev)
+        HomeKitDevice.__init__(self, adapter, _id, dev, bridge=bridge)
 
         self.type = 'onOffSwitch'
 
-        accessories = self.client.get_accessories()
+        if bridge is None and not accessories:
+            accessories = self.client.get_accessories()
+
         if not accessories:
-            self.client.unpair()
+            if bridge is None:
+                self.client.unpair()
+
             raise ValueError('Failed to get accessory list')
 
         for acc in accessories['accessories']:
@@ -123,20 +134,27 @@ class HomeKitPlug(HomeKitDevice):
 class HomeKitBulb(HomeKitDevice):
     """HomeKit smart bulb type."""
 
-    def __init__(self, adapter, _id, dev):
+    def __init__(self, adapter, _id, dev, bridge=None, accessories=None):
         """
         Initialize the object.
 
         adapter -- the Adapter managing this device
         _id -- ID of this device
         dev -- the device description object to initialize from
+        bridge -- HomeKitBridge object, if attached to one
+        accessories -- optional list of accessories to initialize from
         """
-        HomeKitDevice.__init__(self, adapter, _id, dev)
+        HomeKitDevice.__init__(self, adapter, _id, dev, bridge=bridge)
 
         hue, saturation, brightness = None, None, None
-        accessories = self.client.get_accessories()
+
+        if bridge is None and not accessories:
+            accessories = self.client.get_accessories()
+
         if not accessories:
-            self.client.unpair()
+            if bridge is None:
+                self.client.unpair()
+
             raise ValueError('Failed to get accessory list')
 
         for acc in accessories['accessories']:
@@ -212,3 +230,107 @@ class HomeKitBulb(HomeKitDevice):
                                                    brightness))
             else:
                 self.type = 'dimmableLight'
+
+
+class HomeKitBridge(HomeKitDevice):
+    """HomeKit smart plug type."""
+
+    def __init__(self, adapter, _id, dev):
+        """
+        Initialize the object.
+
+        adapter -- the Adapter managing this device
+        _id -- ID of this device
+        dev -- the device description object to initialize from
+        """
+        HomeKitDevice.__init__(self, adapter, _id, dev)
+
+        self.type = 'bridge'
+        self.devices = {}
+
+        accessories = self.client.get_accessories()
+        if not accessories:
+            self.client.unpair()
+            raise ValueError('Failed to get accessory list')
+
+        for acc in accessories['accessories']:
+            aid = acc['aid']
+            name = None
+            model = None
+            device = None
+
+            for svc in acc['services']:
+                for char in svc['characteristics']:
+                    try:
+                        if svc['type'] == \
+                                'public.hap.service.accessory-information':
+                            if char['type'] == \
+                                    'public.hap.characteristic.name':
+                                name = char['value']
+                            elif char['type'] == \
+                                    'public.hap.characteristic.model':
+                                model = char['value']
+                        elif svc['type'] in ['public.hap.service.outlet',
+                                             'public.hap.service.switch']:
+                            if device:
+                                continue
+
+                            device = HomeKitPlug(adapter,
+                                                 '{}-{}'.format(_id, aid),
+                                                 {'md': model, 'name': name},
+                                                 bridge=self,
+                                                 accessories={
+                                                    'accessories': [acc],
+                                                 })
+                        elif svc['type'] == 'public.hap.service.lightbulb':
+                            if device:
+                                continue
+
+                            device = HomeKitBulb(adapter,
+                                                 '{}-{}'.format(_id, aid),
+                                                 {'md': model, 'name': name},
+                                                 bridge=self,
+                                                 accessories={
+                                                    'accessories': [acc],
+                                                 })
+                        else:
+                            continue
+                    except ValueError as e:
+                        print('Failed to create device {}-{}: {}'
+                              .format(_id, aid, e))
+                        continue
+
+            if device is not None:
+                adapter.handle_device_added(device)
+                self.devices[aid] = device
+
+    def poll(self):
+        """Poll the device for changes."""
+        while True:
+            time.sleep(_POLL_INTERVAL)
+
+            accessories = self.client.get_accessories()
+            for acc in accessories['accessories']:
+                aid = acc['aid']
+                if aid not in self.devices:
+                    continue
+
+                device = self.devices[aid]
+                characteristics = []
+
+                to_poll = ['{}.{}'.format(p.aid, p.iid)
+                           for p in device.properties.values()
+                           if p.aid is not None and p.iid is not None]
+
+                for svc in acc['services']:
+                    for char in svc['characteristics']:
+                        iid = char['iid']
+                        if '{}.{}'.format(aid, iid) in to_poll:
+                            characteristics.append({
+                                'aid': aid,
+                                'iid': iid,
+                                'value': char['value'],
+                            })
+
+                for prop in device.properties.values():
+                    prop.update(characteristics)
