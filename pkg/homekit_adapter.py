@@ -3,7 +3,7 @@
 from gateway_addon import Adapter
 from hapclient import HapClient
 
-from .database import Database
+from .homekit_database import HomeKitDatabase
 from .homekit_device import HomeKitBridge, HomeKitBulb, HomeKitPlug
 
 
@@ -69,7 +69,7 @@ class HomeKitAdapter(Adapter):
 
     def unpair_all(self):
         """Unpair all devices."""
-        database = Database()
+        database = HomeKitDatabase(self.package_name)
         database.open()
 
         for dev in self.devices.values():

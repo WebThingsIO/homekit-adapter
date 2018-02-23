@@ -5,7 +5,7 @@ from hapclient import HapClient
 import threading
 import time
 
-from .database import Database
+from .homekit_database import HomeKitDatabase
 from .homekit_property import HomeKitBulbProperty, HomeKitPlugProperty
 from .util import hsv_to_rgb
 
@@ -44,7 +44,7 @@ class HomeKitDevice(Device):
         if bridge is not None:
             return
 
-        database = Database()
+        database = HomeKitDatabase(adapter.package_name)
         if not database.open():
             raise ValueError('Failed to open settings database.')
 

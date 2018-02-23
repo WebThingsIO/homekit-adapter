@@ -13,8 +13,8 @@ from pkg.homekit_adapter import HomeKitAdapter  # flake8: noqa
 
 
 _API_VERSION = {
-    'min': 1,
-    'max': 1,
+    'min': 2,
+    'max': 2,
 }
 _ADAPTER = None
 
