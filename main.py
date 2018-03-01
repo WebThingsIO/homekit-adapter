@@ -25,8 +25,8 @@ def cleanup(signum, frame):
     """Clean up any resources before exiting."""
     if _ADAPTER is not None:
         _ADAPTER.close_proxy()
+        _ADAPTER.unpair_all()
 
-    _ADAPTER.unpair_all()
     sys.exit(0)
 
 
