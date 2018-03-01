@@ -27,12 +27,9 @@ If you're running this add-on outside of the official gateway image for the Rasp
 
 ```bash
 $ sudo apt install python3-dev libnanomsg-dev
-$ sudo pip3 install nnpy
 $ sudo pip3 install \
-    hkdf \
     git+https://github.com/mozilla-iot/gateway-addon-python.git \
     git+https://github.com/mrstegeman/hapclient.git \
-    git+https://github.com/mrstegeman/python-zeroconf \
     git+https://github.com/pyca/pynacl
 ```
 

@@ -25,6 +25,7 @@
     "main.py",
     "pkg/__init__.py",
     "pkg/homekit_adapter.py",
+    "pkg/homekit_database.py",
     "pkg/homekit_device.py",
     "pkg/homekit_property.py",
     "pkg/util.py"

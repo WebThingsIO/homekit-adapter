@@ -1,4 +1,2 @@
-hkdf
-zeroconf
 git+https://github.com/pyca/pynacl
 git+https://github.com/mrstegeman/hapclient
