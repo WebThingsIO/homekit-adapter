@@ -67,6 +67,22 @@ class HomeKitAdapter(Adapter):
         """Cancel the pairing process."""
         self.pairing = False
 
+    def remove_thing(self, device_id):
+        """
+        Unpair a device with the adapter.
+
+        device_id -- ID of device to unpair
+        """
+        device = self.get_device(device_id)
+        if device:
+            if device.client.unpair():
+                database = HomeKitDatabase(self.package_name)
+                database.open()
+                database.remove_pairing_data(device.dev['id'])
+                database.close()
+
+            self.handle_device_removed(device)
+
     def unpair_all(self):
         """Unpair all devices."""
         database = HomeKitDatabase(self.package_name)
