@@ -56,18 +56,22 @@ class HomeKitDevice(Device):
                                     pairing_data=pairing_data)
         else:
             config = database.load_config()
-            if dev['id'] in config['pinCodes']:
-                self.client = HapClient(dev['id'],
-                                        address=dev['address'],
-                                        port=dev['port'])
+            found = False
+            for item in config['pinCodes']:
+                if item['id'] == dev['id']:
+                    found = True
+                    self.client = HapClient(dev['id'],
+                                            address=dev['address'],
+                                            port=dev['port'])
 
-                if not self.client.pair(config['pinCodes'][dev['id']]):
-                    database.close()
-                    raise ValueError('Invalid PIN')
-                else:
-                    database.store_pairing_data(dev['id'],
-                                                self.client.pairing_data)
-            else:
+                    if not self.client.pair(item['pin']):
+                        database.close()
+                        raise ValueError('Invalid PIN')
+                    else:
+                        database.store_pairing_data(dev['id'],
+                                                    self.client.pairing_data)
+
+            if not found:
                 database.close()
                 raise ValueError('Unknown PIN')
 
@@ -257,6 +261,19 @@ class HomeKitBridge(HomeKitDevice):
         self.type = 'bridge'
         self.devices = {}
 
+        self.find_new_devices()
+
+    def remove_device(self, _id):
+        """
+        Remove a device from this bridge.
+
+        _id -- ID of device to remove
+        """
+        if _id in self.devices:
+            del self.devices[_id]
+
+    def find_new_devices(self):
+        """Find any new devices attached to this bridge."""
         accessories = self.client.get_accessories()
         if not accessories:
             self.client.unpair()
@@ -264,6 +281,10 @@ class HomeKitBridge(HomeKitDevice):
 
         for acc in accessories['accessories']:
             aid = acc['aid']
+            _id = '{}-{}'.format(self.id, aid)
+            if _id in self.devices:
+                continue
+
             name = None
             model = None
             device = None
@@ -284,8 +305,8 @@ class HomeKitBridge(HomeKitDevice):
                             if device:
                                 continue
 
-                            device = HomeKitPlug(adapter,
-                                                 '{}-{}'.format(_id, aid),
+                            device = HomeKitPlug(self.adapter,
+                                                 _id,
                                                  {'md': model, 'name': name},
                                                  bridge=self,
                                                  accessories={
@@ -295,8 +316,8 @@ class HomeKitBridge(HomeKitDevice):
                             if device:
                                 continue
 
-                            device = HomeKitBulb(adapter,
-                                                 '{}-{}'.format(_id, aid),
+                            device = HomeKitBulb(self.adapter,
+                                                 _id,
                                                  {'md': model, 'name': name},
                                                  bridge=self,
                                                  accessories={
@@ -306,11 +327,11 @@ class HomeKitBridge(HomeKitDevice):
                             continue
                     except ValueError as e:
                         print('Failed to create device {}-{}: {}'
-                              .format(_id, aid, e))
+                              .format(_id, e))
                         continue
 
             if device is not None:
-                adapter.handle_device_added(device)
+                self.adapter.handle_device_added(device)
                 self.devices[aid] = device
 
     def poll(self):

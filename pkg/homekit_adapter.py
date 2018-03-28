@@ -62,6 +62,8 @@ class HomeKitAdapter(Adapter):
                     continue
 
                 self.handle_device_added(device)
+            elif isinstance(self.devices[_id], HomeKitBridge):
+                self.devices[_id].find_new_devices()
 
     def cancel_pairing(self):
         """Cancel the pairing process."""
@@ -75,11 +77,14 @@ class HomeKitAdapter(Adapter):
         """
         device = self.get_device(device_id)
         if device:
-            if device.client.unpair():
-                database = HomeKitDatabase(self.package_name)
-                database.open()
-                database.remove_pairing_data(device.dev['id'])
-                database.close()
+            if device.bridge is None:
+                if device.client.unpair():
+                    database = HomeKitDatabase(self.package_name)
+                    database.open()
+                    database.remove_pairing_data(device.dev['id'])
+                    database.close()
+            else:
+                device.bridge.remove_device(device_id)
 
             self.handle_device_removed(device)
 
@@ -89,6 +94,9 @@ class HomeKitAdapter(Adapter):
         database.open()
 
         for dev in self.devices.values():
+            if dev.bridge is not None:
+                continue
+
             if dev.client.unpair():
                 database.remove_pairing_data(dev.dev['id'])
 

@@ -2,6 +2,7 @@
   "name": "homekit-adapter",
   "version": "0.1.0",
   "description": "HomeKit device adapter for Mozilla IoT Gateway.",
+  "author": "Mozilla IoT",
   "main": "main.py",
   "keywords": [
     "mozilla",
@@ -38,7 +39,32 @@
     "plugin": true,
     "exec": "python3 {path}/main.py",
     "config": {
-      "pinCodes": {
+      "pinCodes": [
+      ]
+    },
+    "schema": {
+      "type": "object",
+      "properties": {
+        "pinCodes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "pin"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}$"
+              },
+              "pin": {
+                "type": "string",
+                "pattern": "^\\d{3}-\\d{2}-\\d{3}$"
+              }
+            }
+          }
+        }
       }
     }
   }
