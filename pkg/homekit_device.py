@@ -35,7 +35,7 @@ class HomeKitDevice(Device):
             self.description = _id
 
         if 'name' in dev and dev['name']:
-            self.name = dev['name'].split('.')[0]
+            self.name = dev['name'].replace('._hap._tcp.local.', '')
         else:
             self.name = _id
 
@@ -60,6 +60,12 @@ class HomeKitDevice(Device):
             for item in config['pinCodes']:
                 if item['id'] == dev['id']:
                     found = True
+
+                    # If the PIN wasn't set, let's just bail here.
+                    if 'pin' not in item or not item['pin']:
+                        database.close()
+                        raise ValueError('PIN not set')
+
                     self.client = HapClient(dev['id'],
                                             address=dev['address'],
                                             port=dev['port'])
@@ -71,9 +77,18 @@ class HomeKitDevice(Device):
                         database.store_pairing_data(dev['id'],
                                                     self.client.pairing_data)
 
+            # If this PIN wasn't found in the database, add a stub for the user
+            # to configure.
             if not found:
+                config['pinCodes'].append({
+                    'id': dev['id'],
+                    'pin': '',
+                    'note': '{} ({})'.format(self.name, dev['md']),
+                })
+
+                database.save_config(config)
                 database.close()
-                raise ValueError('Unknown PIN')
+                raise ValueError('PIN not set')
 
         database.close()
 

@@ -52,8 +52,7 @@
           "items": {
             "type": "object",
             "required": [
-              "id",
-              "pin"
+              "id"
             ],
             "properties": {
               "id": {
@@ -63,6 +62,9 @@
               "pin": {
                 "type": "string",
                 "pattern": "^\\d{3}-\\d{2}-\\d{3}$"
+              },
+              "note": {
+                "type": "string"
               }
             }
           }
