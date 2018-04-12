@@ -44,4 +44,4 @@ if __name__ == '__main__':
     # Wait until the proxy stops running, indicating that the gateway shut us
     # down.
     while _ADAPTER.proxy_running():
-        time.sleep(5)
+        time.sleep(2)
