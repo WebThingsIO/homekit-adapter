@@ -6,6 +6,7 @@ import threading
 import time
 
 from .homekit_database import HomeKitDatabase
+from .homekit_errors import DatabaseError, HapError, PairingError
 from .homekit_property import HomeKitBulbProperty, HomeKitPlugProperty
 from .util import hsv_to_rgb
 
@@ -46,7 +47,7 @@ class HomeKitDevice(Device):
 
         database = HomeKitDatabase(adapter.package_name)
         if not database.open():
-            raise ValueError('Failed to open settings database.')
+            raise DatabaseError('Failed to open settings database.')
 
         pairing_data = database.load_pairing_data(dev['id'])
         if pairing_data:
@@ -64,7 +65,7 @@ class HomeKitDevice(Device):
                     # If the PIN wasn't set, let's just bail here.
                     if 'pin' not in item or not item['pin']:
                         database.close()
-                        raise ValueError('PIN not set')
+                        raise PairingError(PairingError.UNKNOWN_PIN)
 
                     self.client = HapClient(dev['id'],
                                             address=dev['address'],
@@ -72,10 +73,10 @@ class HomeKitDevice(Device):
 
                     if not self.client.pair(item['pin']):
                         database.close()
-                        raise ValueError('Invalid PIN')
-                    else:
-                        database.store_pairing_data(dev['id'],
-                                                    self.client.pairing_data)
+                        raise PairingError(PairingError.INVALID_PIN)
+
+                    database.store_pairing_data(dev['id'],
+                                                self.client.pairing_data)
 
             # If this PIN wasn't found in the database, add a stub for the user
             # to configure.
@@ -88,7 +89,7 @@ class HomeKitDevice(Device):
 
                 database.save_config(config)
                 database.close()
-                raise ValueError('PIN not set')
+                raise PairingError(PairingError.UNKNOWN_PIN)
 
         database.close()
 
@@ -137,7 +138,7 @@ class HomeKitPlug(HomeKitDevice):
             if bridge is None:
                 self.client.unpair()
 
-            raise ValueError('Failed to get accessory list')
+            raise HapError('Failed to get accessory list')
 
         for acc in accessories['accessories']:
             aid = acc['aid']
@@ -183,7 +184,7 @@ class HomeKitBulb(HomeKitDevice):
             if bridge is None:
                 self.client.unpair()
 
-            raise ValueError('Failed to get accessory list')
+            raise HapError('Failed to get accessory list')
 
         for acc in accessories['accessories']:
             aid = acc['aid']
@@ -243,21 +244,20 @@ class HomeKitBulb(HomeKitDevice):
 
         if brightness is None:
             self.type = 'onOffLight'
-        else:
-            if hue is not None and saturation is not None:
-                self.type = 'dimmableColorLight'
+        elif hue is not None and saturation is not None:
+            self.type = 'dimmableColorLight'
 
-                self.properties['color'] = \
-                    HomeKitBulbProperty(self,
-                                        None,
-                                        None,
-                                        'color',
-                                        {'type': 'string'},
-                                        hsv_to_rgb(hue,
-                                                   saturation,
-                                                   brightness))
-            else:
-                self.type = 'dimmableLight'
+            self.properties['color'] = \
+                HomeKitBulbProperty(self,
+                                    None,
+                                    None,
+                                    'color',
+                                    {'type': 'string'},
+                                    hsv_to_rgb(hue,
+                                               saturation,
+                                               brightness))
+        else:
+            self.type = 'dimmableLight'
 
 
 class HomeKitBridge(HomeKitDevice):
@@ -292,7 +292,7 @@ class HomeKitBridge(HomeKitDevice):
         accessories = self.client.get_accessories()
         if not accessories:
             self.client.unpair()
-            raise ValueError('Failed to get accessory list')
+            raise HapError('Failed to get accessory list')
 
         for acc in accessories['accessories']:
             aid = acc['aid']
@@ -340,10 +340,20 @@ class HomeKitBridge(HomeKitDevice):
                                                  })
                         else:
                             continue
-                    except ValueError as e:
-                        print('Failed to create device {}-{}: {}'
+                    except PairingError as e:
+                        # This should _never_ happen, as pairing is performed
+                        # with the bridge, not individual devices, and that
+                        # should already be done at this point.
+                        print('Failed to pair with device {}: {}'
                               .format(_id, e))
                         continue
+                    except HapError as e:
+                        print('Error communicating with device {}: {}'
+                              .format(_id, e))
+                        continue
+                    except DatabaseError as e:
+                        print('Database error: {}'.format(e))
+                        raise
 
             if device is not None:
                 self.adapter.handle_device_added(device)
@@ -379,3 +389,55 @@ class HomeKitBridge(HomeKitDevice):
 
                 for prop in device.properties.values():
                     prop.update(characteristics)
+
+
+class HomeKitUnpairedDevice(Device):
+    """HomeKit unpaired device type stub."""
+
+    def __init__(self, adapter, _id, dev):
+        """
+        Initialize the object.
+
+        adapter -- the Adapter managing this device
+        _id -- ID of this device
+        dev -- the device description object to initialize from
+        """
+        Device.__init__(self, adapter, _id)
+
+        self.type = 'thing'
+        self.pin_required = True
+        self.pin_pattern = r'^\d{3}-\d{2}-\d{3}$'
+        self.dev = dev
+
+        if 'md' in dev and dev['md']:
+            self.description = dev['md']
+        else:
+            self.description = _id
+
+        if 'name' in dev and dev['name']:
+            self.name = dev['name'].replace('._hap._tcp.local.', '')
+        else:
+            self.name = _id
+
+    def pair(self, pin):
+        """
+        Attempt to pair with the device.
+
+        pin -- PIN to use for pairing
+        """
+        database = HomeKitDatabase(self.adapter.package_name)
+        if not database.open():
+            raise DatabaseError('Failed to open settings database.')
+
+        client = HapClient(self.dev['id'],
+                           address=self.dev['address'],
+                           port=self.dev['port'])
+
+        if not client.pair(pin):
+            database.close()
+            raise PairingError(PairingError.INVALID_PIN)
+
+        database.store_pairing_data(self.dev['id'],
+                                    client.pairing_data)
+
+        database.close()
