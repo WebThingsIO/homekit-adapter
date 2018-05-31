@@ -4,8 +4,14 @@ from gateway_addon import Adapter
 from hapclient import HapClient
 
 from .homekit_database import HomeKitDatabase
-from .homekit_device import HomeKitBridge, HomeKitBulb, HomeKitPlug
+from .homekit_device import (HomeKitBridge, HomeKitBulb, HomeKitPlug,
+                             HomeKitUnpairedDevice)
+from .homekit_errors import DatabaseError, HapError, PairingError
 
+try:
+    from gateway_addon.errors import SetPinError
+except ImportError:
+    pass
 
 _TIMEOUT = 3
 
@@ -56,10 +62,18 @@ class HomeKitAdapter(Adapter):
                         continue
                     else:
                         continue
-                except ValueError as e:
-                    print('Failed to create device {}: {}'
+                except PairingError as e:
+                    print('Failed to pair with device {}: {}'
+                          .format(dev['id'], e))
+
+                    device = HomeKitUnpairedDevice(self, _id, dev)
+                except HapError as e:
+                    print('Error communicating with device {}: {}'
                           .format(dev['id'], e))
                     continue
+                except DatabaseError as e:
+                    print('Database error: {}'.format(e))
+                    raise
 
                 self.handle_device_added(device)
             elif isinstance(self.devices[_id], HomeKitBridge):
@@ -69,6 +83,39 @@ class HomeKitAdapter(Adapter):
         """Cancel the pairing process."""
         self.pairing = False
 
+    def set_pin(self, device_id, pin):
+        """
+        Set the PIN for the given device.
+
+        device_id -- ID of device
+        pin -- PIN to set
+        """
+        device = self.get_device(device_id)
+        if device:
+            if isinstance(device, HomeKitUnpairedDevice):
+                try:
+                    device.pair(pin)
+                    dev = device.dev
+
+                    if dev['ci'] in ['Outlet', 'Switch']:
+                        device = HomeKitPlug(self, device_id, dev)
+                    elif dev['ci'] == 'Lightbulb':
+                        device = HomeKitBulb(self, device_id, dev)
+                    elif dev['ci'] == 'Bridge':
+                        device = HomeKitBridge(self, device_id, dev)
+
+                    # Replace the unpaired device with the proper device type.
+                    self.devices[device_id] = device
+                except (DatabaseError, PairingError) as e:
+                    print('Failed to pair with device {}: {}'
+                          .format(device_id, e))
+
+                    # set_pin() should never be called when SetPinError is not
+                    # present, so this is safe.
+                    raise SetPinError(str(e))
+            else:
+                raise SetPinError('Device already paired')
+
     def remove_thing(self, device_id):
         """
         Unpair a device with the adapter.
@@ -76,7 +123,7 @@ class HomeKitAdapter(Adapter):
         device_id -- ID of device to unpair
         """
         device = self.get_device(device_id)
-        if device:
+        if device and not isinstance(device, HomeKitUnpairedDevice):
             if device.bridge is None:
                 if device.client.unpair():
                     database = HomeKitDatabase(self.package_name)
@@ -94,7 +141,8 @@ class HomeKitAdapter(Adapter):
         database.open()
 
         for dev in self.devices.values():
-            if dev.bridge is not None:
+            if isinstance(dev, HomeKitUnpairedDevice) or \
+                    dev.bridge is not None:
                 continue
 
             if dev.client.unpair():
