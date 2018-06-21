@@ -1,6 +1,7 @@
 {
   "name": "homekit-adapter",
-  "version": "0.1.2",
+  "display_name": "HomeKit",
+  "version": "0.1.3",
   "description": "HomeKit device adapter for Mozilla IoT Gateway.",
   "author": "Mozilla IoT",
   "main": "bootstrap.py",
