@@ -27,6 +27,7 @@ class HomeKitDevice(Device):
         bridge -- HomeKitBridge object, if attached to one
         """
         Device.__init__(self, adapter, _id)
+        self._type = []
 
         self.dev = dev
 
@@ -130,6 +131,7 @@ class HomeKitPlug(HomeKitDevice):
         HomeKitDevice.__init__(self, adapter, _id, dev, bridge=bridge)
 
         self.type = 'onOffSwitch'
+        self._type.append('OnOffSwitch')
 
         if bridge is None and not accessories:
             accessories = self.client.get_accessories()
@@ -156,7 +158,15 @@ class HomeKitPlug(HomeKitDevice):
                                          'public.hap.service.switch'] and \
                             char['type'] == 'public.hap.characteristic.on':
                         self.properties['on'] = HomeKitPlugProperty(
-                            self, aid, iid, 'on', {'type': 'boolean'},
+                            self,
+                            aid,
+                            iid,
+                            'on',
+                            {
+                                '@type': 'OnOffProperty',
+                                'label': 'On/Off',
+                                'type': 'boolean',
+                            },
                             char['value'])
 
 
@@ -174,6 +184,8 @@ class HomeKitBulb(HomeKitDevice):
         accessories -- optional list of accessories to initialize from
         """
         HomeKitDevice.__init__(self, adapter, _id, dev, bridge=bridge)
+
+        self._type.extend(['OnOffSwitch', 'Light'])
 
         hue, saturation, brightness = None, None, None
 
@@ -201,61 +213,81 @@ class HomeKitBulb(HomeKitDevice):
                     elif svc['type'] == 'public.hap.service.lightbulb':
                         if char['type'] == 'public.hap.characteristic.on':
                             self.properties['on'] = HomeKitBulbProperty(
-                                self, aid, iid, 'on', {'type': 'boolean'},
+                                self,
+                                aid,
+                                iid,
+                                'on',
+                                {
+                                    '@type': 'OnOffProperty',
+                                    'label': 'On/Off',
+                                    'type': 'boolean',
+                                },
                                 char['value'])
                         elif char['type'] == 'public.hap.characteristic.hue':
-                            self.properties['_hue'] = \
-                                HomeKitBulbProperty(self,
-                                                    aid,
-                                                    iid,
-                                                    '_hue',
-                                                    {'type': 'number',
-                                                     'unit': 'arcdegrees',
-                                                     'min': 0,
-                                                     'max': 360},
-                                                    char['value'])
+                            self.properties['_hue'] = HomeKitBulbProperty(
+                                self,
+                                aid,
+                                iid,
+                                '_hue',
+                                {
+                                    'type': 'number',
+                                    'unit': 'arcdegrees',
+                                    'min': 0,
+                                    'max': 360,
+                                },
+                                char['value'])
                             hue = char['value']
                         elif char['type'] == \
                                 'public.hap.characteristic.saturation':
                             self.properties['_saturation'] = \
-                                HomeKitBulbProperty(self,
-                                                    aid,
-                                                    iid,
-                                                    '_saturation',
-                                                    {'type': 'number',
-                                                     'unit': 'percent',
-                                                     'min': 0,
-                                                     'max': 100},
-                                                    char['value'])
+                                HomeKitBulbProperty(
+                                    self,
+                                    aid,
+                                    iid,
+                                    '_saturation',
+                                    {
+                                        'type': 'number',
+                                        'unit': 'percent',
+                                        'min': 0,
+                                        'max': 100,
+                                    },
+                                    char['value'])
                             saturation = char['value']
                         elif char['type'] == \
                                 'public.hap.characteristic.brightness':
-                            self.properties['level'] = \
-                                HomeKitBulbProperty(self,
-                                                    aid,
-                                                    iid,
-                                                    'level',
-                                                    {'type': 'number',
-                                                     'unit': 'percent',
-                                                     'min': 0,
-                                                     'max': 100},
-                                                    char['value'])
+                            self.properties['level'] = HomeKitBulbProperty(
+                                self,
+                                aid,
+                                iid,
+                                'level',
+                                {
+                                    '@type': 'BrightnessProperty',
+                                    'label': 'Brightness',
+                                    'type': 'number',
+                                    'unit': 'percent',
+                                    'min': 0,
+                                    'max': 100,
+                                },
+                                char['value'])
                             brightness = char['value']
 
         if brightness is None:
             self.type = 'onOffLight'
         elif hue is not None and saturation is not None:
             self.type = 'dimmableColorLight'
+            self._type.append('ColorControl')
 
-            self.properties['color'] = \
-                HomeKitBulbProperty(self,
-                                    None,
-                                    None,
-                                    'color',
-                                    {'type': 'string'},
-                                    hsv_to_rgb(hue,
-                                               saturation,
-                                               brightness))
+            self.properties['color'] = HomeKitBulbProperty(
+                self,
+                None,
+                None,
+                'color',
+                {
+                    '@type': 'ColorProperty',
+                    'label': 'Color',
+                    'type': 'string',
+                },
+                hsv_to_rgb(hue, saturation, brightness))
         else:
             self.type = 'dimmableLight'
 
