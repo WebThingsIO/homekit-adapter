@@ -83,6 +83,10 @@ class HomeKitBulbProperty(HomeKitProperty):
 
         value -- the value to set
         """
+        if self.name == 'colorTemperature':
+            HomeKitProperty.set_value(self, int(1e6 / value))
+            return
+
         if self.name != 'color':
             HomeKitProperty.set_value(self, value)
             return
@@ -120,29 +124,42 @@ class HomeKitBulbProperty(HomeKitProperty):
         if self.name.startswith('_'):
             return
 
-        if self.name != 'color':
+        if self.name not in ['color', 'colorTemperature']:
             HomeKitProperty.update(self, characteristics)
             return
 
-        # Get the hue property and characteristic
-        hp = self.device.properties['_hue']
-        hc = list(filter(lambda x: x['aid'] == hp.aid and x['iid'] == hp.iid,
-                         characteristics))
+        if self.name == 'colorTemperature':
+            c = list(
+                filter(lambda x: x['aid'] == self.aid and x['iid'] == self.iid,
+                       characteristics))
+            if not c:
+                return
 
-        # Get the saturation property and characteristic
-        sp = self.device.properties['_saturation']
-        sc = list(filter(lambda x: x['aid'] == sp.aid and x['iid'] == sp.iid,
-                         characteristics))
+            value = int(1e6 / c[0]['value'])
+        elif self.name == 'color':
+            # Get the hue property and characteristic
+            hp = self.device.properties['_hue']
+            hc = list(
+                filter(lambda x: x['aid'] == hp.aid and x['iid'] == hp.iid,
+                       characteristics))
 
-        # Get the brightness property and characteristic
-        vp = self.device.properties['level']
-        vc = list(filter(lambda x: x['aid'] == vp.aid and x['iid'] == vp.iid,
-                         characteristics))
+            # Get the saturation property and characteristic
+            sp = self.device.properties['_saturation']
+            sc = list(
+                filter(lambda x: x['aid'] == sp.aid and x['iid'] == sp.iid,
+                       characteristics))
 
-        if not hc or not sc or not vc:
-            return
+            # Get the brightness property and characteristic
+            vp = self.device.properties['level']
+            vc = list(
+                filter(lambda x: x['aid'] == vp.aid and x['iid'] == vp.iid,
+                       characteristics))
 
-        value = hsv_to_rgb(hc[0]['value'], sc[0]['value'], vc[0]['value'])
+            if not hc or not sc or not vc:
+                return
+
+            value = hsv_to_rgb(hc[0]['value'], sc[0]['value'], vc[0]['value'])
+
         if value != self.value:
             self.set_cached_value(value)
             self.device.notify_property_changed(self)
