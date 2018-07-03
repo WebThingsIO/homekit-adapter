@@ -8,12 +8,14 @@ HomeKit device adapter for Mozilla IoT Gateway
 
 ## Tested and Working
 
-* Smart plugs (represented as `onOffSwitch`)
+* Smart plugs
     * [iDevices Switch](https://store.idevicesinc.com/idevices-switch/)
     * [Koogeek P1](https://www.koogeek.com/p-p1.html)
 * Bridges
     * [Homebridge](https://github.com/nfarina/homebridge)
     * [Philips Hue Bridge v2](https://www2.meethue.com/en-us/p/hue-bridge/046677458478)
+* Light bulbs
+    * [LIFX A19](https://www.lifx.com/products/lifx)
 
 ## Untested but _Should Work_
 

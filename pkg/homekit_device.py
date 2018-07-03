@@ -236,6 +236,7 @@ class HomeKitBulb(HomeKitDevice):
                                     'max': 360,
                                 },
                                 char['value'])
+                            self.properties['_hue'].visible = False
                             hue = char['value']
                         elif char['type'] == \
                                 'public.hap.characteristic.saturation':
@@ -252,6 +253,7 @@ class HomeKitBulb(HomeKitDevice):
                                         'max': 100,
                                     },
                                     char['value'])
+                            self.properties['_saturation'].visible = False
                             saturation = char['value']
                         elif char['type'] == \
                                 'public.hap.characteristic.brightness':
@@ -269,6 +271,24 @@ class HomeKitBulb(HomeKitDevice):
                                     'max': 100,
                                 },
                                 char['value'])
+                            brightness = char['value']
+                        elif char['type'] == \
+                                'public.hap.characteristic.color-temperature':
+                            self.properties['colorTemperature'] = \
+                                HomeKitBulbProperty(
+                                    self,
+                                    aid,
+                                    iid,
+                                    'colorTemperature',
+                                    {
+                                        '@type': 'ColorTemperatureProperty',
+                                        'label': 'Color Temperature',
+                                        'type': 'number',
+                                        'unit': 'kelvin',
+                                        'min': 2500,
+                                        'max': 20000,
+                                    },
+                                    int(1e6 / char['value']))
                             brightness = char['value']
 
         if brightness is None:
