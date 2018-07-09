@@ -187,7 +187,7 @@ class HomeKitBulb(HomeKitDevice):
 
         self._type.extend(['OnOffSwitch', 'Light'])
 
-        hue, saturation, brightness = None, None, None
+        hue, saturation, brightness, color_temp = None, None, None, None
 
         if bridge is None and not accessories:
             accessories = self.client.get_accessories()
@@ -289,14 +289,13 @@ class HomeKitBulb(HomeKitDevice):
                                         'max': 20000,
                                     },
                                     int(1e6 / char['value']))
-                            brightness = char['value']
+                            color_temp = int(1e6 / char['value'])
 
-        if brightness is None:
-            self.type = 'onOffLight'
-        elif hue is not None and saturation is not None:
-            self.type = 'dimmableColorLight'
+        if hue is not None and saturation is not None:
+            self.type = 'onOffColorLight'
             self._type.append('ColorControl')
 
+            self.properties['level'].visible = False
             self.properties['color'] = HomeKitBulbProperty(
                 self,
                 None,
@@ -308,8 +307,17 @@ class HomeKitBulb(HomeKitDevice):
                     'type': 'string',
                 },
                 hsv_to_rgb(hue, saturation, brightness))
-        else:
+        elif color_temp is not None:
+            self._type.append('ColorControl')
+
+            if brightness is not None:
+                self.type = 'dimmableColorLight'
+            else:
+                self.type = 'onOffColorLight'
+        elif brightness is None:
             self.type = 'dimmableLight'
+        else:
+            self.type = 'onOffLight'
 
 
 class HomeKitBridge(HomeKitDevice):
