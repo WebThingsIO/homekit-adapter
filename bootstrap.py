@@ -19,7 +19,8 @@ def install_packages():
     system_option = ''
     try:
         import lsb_release
-        if lsb_release.get_distro_information()['ID'] == 'Raspbian':
+        if lsb_release.get_distro_information()['ID'] in ['Raspbian',
+                                                          'Debian']:
             system_option = '--system'
     except ImportError:
         pass
