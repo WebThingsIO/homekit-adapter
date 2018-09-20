@@ -1,10 +1,16 @@
 {
   "name": "homekit-adapter",
   "display_name": "HomeKit",
-  "version": "0.2.3",
-  "description": "HomeKit device adapter for Mozilla IoT Gateway.",
+  "version": "0.3.0",
+  "description": "HomeKit device adapter.",
   "author": "Mozilla IoT",
-  "main": "bootstrap.py",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "lint": "eslint ."
+  },
   "keywords": [
     "mozilla",
     "iot",
@@ -20,20 +26,23 @@
   "bugs": {
     "url": "https://github.com/mozilla-iot/homekit-adapter/issues"
   },
+  "dependencies": {
+    "color": "^3.0.0",
+    "hap-controller": "^0.1.3"
+  },
+  "devDependencies": {
+    "babel-eslint": "^9.0.0",
+    "eslint": "^5.5.0"
+  },
   "files": [
     "LICENSE",
     "SHA256SUMS",
-    "bootstrap.py",
-    "main.py",
-    "pkg/__init__.py",
-    "pkg/homekit_adapter.py",
-    "pkg/homekit_database.py",
-    "pkg/homekit_device.py",
-    "pkg/homekit_errors.py",
-    "pkg/homekit_property.py",
-    "pkg/util.py",
-    "requirements.txt",
-    "setup.cfg"
+    "index.js",
+    "lib/homekit-adapter.js",
+    "lib/homekit-database.js",
+    "lib/homekit-device.js",
+    "lib/homekit-property.js",
+    "lib/util.js"
   ],
   "moziot": {
     "api": {
@@ -41,7 +50,7 @@
       "max": 2
     },
     "plugin": true,
-    "exec": "python3 {path}/bootstrap.py",
+    "exec": "{nodeLoader} {path}",
     "config": {
       "pinCodes": [
       ]
@@ -59,11 +68,11 @@
             "properties": {
               "id": {
                 "type": "string",
-                "pattern": "^[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}$"
+                "pattern": "^[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}$"
               },
               "pin": {
                 "type": "string",
-                "pattern": "^\\d{3}-\\d{2}-\\d{3}$"
+                "pattern": "^$|^\\d{3}-\\d{2}-\\d{3}$"
               },
               "note": {
                 "type": "string"

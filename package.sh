@@ -1,23 +1,28 @@
-#!/bin/bash
+#!/bin/bash -e
 
-set -e
+rm -rf node_modules
+if [ -z "${ADDON_ARCH}" ]; then
+  TARFILE_SUFFIX=
+else
+  NODE_VERSION="$(node --version)"
+  TARFILE_SUFFIX="-${ADDON_ARCH}-${NODE_VERSION/\.*/}"
+fi
+if [ "${ADDON_ARCH}" == "linux-arm" ]; then
+  # We assume that CC and CXX are pointing to the cross compilers
+  yarn --ignore-scripts --production
+  npm rebuild --arch=armv6l --target_arch=arm
+else
+  yarn install --production
+fi
 
-version=$(grep version package.json | cut -d: -f2 | cut -d\" -f2)
-
-# Clean up from previous releases
-rm -rf *.tgz package
 rm -f SHA256SUMS
-
-# Put package together
-mkdir package
-cp -r pkg LICENSE package.json *.py requirements.txt setup.cfg package/
-find package -type f -name '*.pyc' -delete
-find package -type d -empty -delete
-
-# Generate checksums
-cd package
-sha256sum *.py pkg/*.py LICENSE requirements.txt setup.cfg > SHA256SUMS
-cd -
-
-# Make the tarball
-tar czf "homekit-adapter-${version}.tgz" package
+sha256sum package.json *.js LICENSE > SHA256SUMS
+find node_modules -type f -exec sha256sum {} \; >> SHA256SUMS
+TARFILE="$(npm pack)"
+tar xzf ${TARFILE}
+rm ${TARFILE}
+TARFILE_ARCH="${TARFILE/.tgz/${TARFILE_SUFFIX}.tgz}"
+cp -r node_modules ./package
+tar czf ${TARFILE_ARCH} package
+rm -rf package
+echo "Created ${TARFILE_ARCH}"

@@ -1,6 +1,5 @@
-*.pyc
 *.swp
 *.tgz
-lib/
-package/
 SHA256SUMS
+node_modules/
+yarn.lock
