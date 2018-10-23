@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "color": "^3.0.0",
-    "hap-controller": "^0.1.3"
+    "hap-controller": "^0.1.4"
   },
   "devDependencies": {
     "babel-eslint": "^9.0.0",
