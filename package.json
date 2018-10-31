@@ -1,7 +1,7 @@
 {
   "name": "homekit-adapter",
   "display_name": "HomeKit",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "HomeKit device adapter.",
   "author": "Mozilla IoT",
   "main": "index.js",
@@ -27,12 +27,12 @@
     "url": "https://github.com/mozilla-iot/homekit-adapter/issues"
   },
   "dependencies": {
-    "color": "^3.0.0",
-    "hap-controller": "^0.1.4"
+    "color": "^3.1.0",
+    "hap-controller": "^0.1.5"
   },
   "devDependencies": {
-    "babel-eslint": "^9.0.0",
-    "eslint": "^5.5.0"
+    "babel-eslint": "^10.0.1",
+    "eslint": "^5.8.0"
   },
   "files": [
     "LICENSE",
