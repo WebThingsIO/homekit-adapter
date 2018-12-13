@@ -71,3 +71,12 @@ If your devices were not auto-populated in the configuration screen, you can fin
 6. Click _Apply_.
 7. After a few seconds, go back to the _Things_ screen and start a new search again.
 8. If everything went well, your devices should now be available.
+
+## Troubleshooting
+
+If you're having issues pairing, some of the following steps may help.
+
+* Pair the device with iOS and update the firmware. You will have to then unpair or reset the device before attempting to pair with the gateway again.
+* Perform a hard reset on the device.
+    * This typically requires you to hold a button on the device for 10-15 seconds. See device manual.
+* [Configure the PIN manually](#manual-configuration) (starting at step 3). Sometimes this works better than setting the PIN through the _Add New Things_ screen.
