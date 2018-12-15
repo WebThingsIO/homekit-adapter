@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "color": "^3.1.0",
-    "hap-controller": "^0.1.7"
+    "hap-controller": "^0.1.8"
   },
   "devDependencies": {
     "babel-eslint": "^10.0.1",
@@ -50,37 +50,6 @@
       "max": 2
     },
     "plugin": true,
-    "exec": "{nodeLoader} {path}",
-    "config": {
-      "pinCodes": [
-      ]
-    },
-    "schema": {
-      "type": "object",
-      "properties": {
-        "pinCodes": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": [
-              "id"
-            ],
-            "properties": {
-              "id": {
-                "type": "string",
-                "pattern": "^[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}$"
-              },
-              "pin": {
-                "type": "string",
-                "pattern": "^$|^\\d{3}-\\d{2}-\\d{3}$"
-              },
-              "note": {
-                "type": "string"
-              }
-            }
-          }
-        }
-      }
-    }
+    "exec": "{nodeLoader} {path}"
   }
 }
