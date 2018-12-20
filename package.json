@@ -42,7 +42,9 @@
     "lib/homekit-database.js",
     "lib/homekit-device.js",
     "lib/homekit-property.js",
-    "lib/util.js"
+    "lib/property-utils.js",
+    "lib/util.js",
+    "lib/vendor-extensions.js"
   ],
   "moziot": {
     "api": {
