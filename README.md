@@ -35,18 +35,6 @@ This add-on can be installed through the UI, via _Settings -> Add-ons -> +_.
 
 **NOTE:** If you plan to use BLE devices, and you have the "Web Thing" add-on installed, you should disable Bluetooth scanning in that add-on by navigating to _Settings -> Add-ons_, clicking _Configure_ next to "Web Thing", setting _bluetoothEnabled_ to false (unchecked), then clicking _Apply_.
 
-# Configuration
-
-When new devices are detected, they are added to the add-on's config with a blank PIN entry. Therefore, to configure each device's PIN, do the following:
-
-1. Start a search for new devices from the _Things_ screen.
-2. After the search has completed, navigate to _Settings -> Add-ons_.
-3. Click on the _Configure_ button for the HomeKit add-on.
-4. Any new devices should be auto-populated in the _pinCodes_ list. Fill in the PIN for each as required.
-5. Click _Apply_.
-6. After a few seconds, go back to the _Things_ screen and start a new search again.
-7. If everything went well, your devices should now be available.
-
 ## Troubleshooting
 
 If you're having issues pairing, some of the following steps may help.
