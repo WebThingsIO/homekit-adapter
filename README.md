@@ -33,8 +33,6 @@ Most other WiFi and BLE devices should work.
 
 This add-on can be installed through the UI, via _Settings -> Add-ons -> +_.
 
-**NOTE:** If you plan to use BLE devices, and you have the "Web Thing" add-on installed, you should disable Bluetooth scanning in that add-on by navigating to _Settings -> Add-ons_, clicking _Configure_ next to "Web Thing", setting _bluetoothEnabled_ to false (unchecked), then clicking _Apply_.
-
 ## Troubleshooting
 
 If you're having issues pairing, some of the following steps may help.
