@@ -1,7 +1,7 @@
 {
   "name": "homekit-adapter",
   "display_name": "HomeKit",
-  "version": "0.3.8",
+  "version": "0.4.0",
   "description": "HomeKit device adapter.",
   "author": "Mozilla IoT",
   "main": "index.js",
@@ -28,11 +28,11 @@
   },
   "dependencies": {
     "color": "^3.1.2",
-    "hap-controller": "^0.1.10"
+    "hap-controller": "^0.1.12"
   },
   "devDependencies": {
-    "babel-eslint": "^10.0.1",
-    "eslint": "^5.16.0"
+    "babel-eslint": "^10.0.2",
+    "eslint": "^6.1.0"
   },
   "files": [
     "LICENSE",
@@ -51,7 +51,23 @@
       "min": 2,
       "max": 2
     },
+    "type": "adapter",
     "plugin": true,
-    "exec": "{nodeLoader} {path}"
+    "exec": "{nodeLoader} {path}",
+    "config": {
+      "enableBluetooth": true
+    },
+    "schema": {
+      "type": "object",
+      "required": [
+        "enableBluetooth"
+      ],
+      "properties": {
+        "enableBluetooth": {
+          "type": "boolean",
+          "description": "Whether or not to enable Bluetooth device support."
+        }
+      }
+    }
   }
 }
