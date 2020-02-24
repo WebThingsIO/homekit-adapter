@@ -9,14 +9,7 @@ else
   TARFILE_SUFFIX="-${ADDON_ARCH}-${NODE_VERSION/\.*/}"
 fi
 
-# For openwrt-linux-arm and linux-arm we need to cross compile.
-if [[ "${ADDON_ARCH}" =~ "linux-arm" ]]; then
-  # We assume that CC and CXX are pointing to the cross compilers
-  npm install --ignore-scripts --production
-  npm rebuild --arch=armv6l --target_arch=arm
-else
-  npm install --production
-fi
+npm install --production
 
 shasum --algorithm 256 manifest.json package.json *.js lib/*.js LICENSE README.md > SHA256SUMS
 
