@@ -1,7 +1,7 @@
 {
   "name": "homekit-adapter",
   "display_name": "HomeKit",
-  "version": "0.8.5",
+  "version": "0.8.6",
   "description": "HomeKit device adapter.",
   "author": "Mozilla IoT",
   "main": "index.js",
@@ -28,8 +28,8 @@
   },
   "dependencies": {
     "color": "^3.1.2",
-    "hap-controller": "^0.3.1",
-    "mkdirp": "^0.5.1",
+    "hap-controller": "^0.3.4",
+    "mkdirp": "^1.0.4",
     "node-persist": "^3.0.5"
   },
   "devDependencies": {
