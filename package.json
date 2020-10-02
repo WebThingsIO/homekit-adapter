@@ -1,8 +1,8 @@
 {
   "name": "homekit-adapter",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "description": "HomeKit device adapter.",
-  "author": "Mozilla IoT",
+  "author": "WebThingsIO",
   "main": "index.js",
   "directories": {
     "lib": "lib"
@@ -10,14 +10,14 @@
   "scripts": {
     "lint": "eslint ."
   },
-  "homepage": "https://github.com/mozilla-iot/homekit-adapter",
+  "homepage": "https://github.com/WebThingsIO/homekit-adapter",
   "license": "MPL-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mozilla-iot/homekit-adapter.git"
+    "url": "https://github.com/WebThingsIO/homekit-adapter.git"
   },
   "bugs": {
-    "url": "https://github.com/mozilla-iot/homekit-adapter/issues"
+    "url": "https://github.com/WebThingsIO/homekit-adapter/issues"
   },
   "dependencies": {
     "color": "^3.1.2",
@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",
-    "eslint": "^7.5.0"
+    "eslint": "^7.10.0"
   },
   "files": [
     "LICENSE",

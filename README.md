@@ -1,6 +1,6 @@
 # homekit-adapter
 
-HomeKit device adapter for Mozilla WebThings Gateway
+HomeKit device adapter for WebThings Gateway
 
 ## Supported Devices
 
