@@ -1,6 +1,6 @@
 {
   "name": "homekit-adapter",
-  "version": "0.10.2",
+  "version": "0.10.3",
   "description": "HomeKit device adapter.",
   "author": "WebThingsIO",
   "main": "index.js",
